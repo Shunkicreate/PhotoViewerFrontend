@@ -5,15 +5,15 @@ services:
     image: nginx:latest
     container_name: nginx-container
     depends_on:
-      - remix_app
+      - photoviewer
     networks:
       - webnet
 
-  remix_app:
+  photoviewer:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: remix-app-container
+    container_name: photoviewer-container
     networks:
       - webnet
     environment:
