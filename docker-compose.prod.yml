@@ -1,10 +1,10 @@
-version: '3.8'
+version: "3.8"
 
 services:
   nginx:
     ports:
-      - "8080:80"  # 本番用に80ポートで公開
-    restart: always  # サービスの自動再起動
+      - "8081:81" # 本番用に80ポートで公開
+    restart: always # サービスの自動再起動
     volumes:
       - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
 
@@ -12,7 +12,8 @@ services:
     environment:
       - NODE_ENV=production
     ports:
-      - "3001:3001"  # 本番環境では内部通信のみで使用
+      - "3001:3001" # 本番環境では内部通信のみで使用
     volumes:
       - "${HOST_NAS_PATH}:${NAS_PATH}"
     restart: always
+
