@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx-container
+    depends_on:
+      - remix_app
+    networks:
+      - webnet
+
+  remix_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: remix-app-container
+    networks:
+      - webnet
+    environment:
+      - NAS_PATH=${NAS_PATH}  # .envファイルのNAS_PATHを使用
+
+networks:
+  webnet:
+    driver: bridge
