@@ -11,8 +11,6 @@ services:
   photoviewer:
     environment:
       - NODE_ENV=production
-    ports:
-      - "5174:5174" # 本番環境では内部通信のみで使用
     volumes:
       - "${HOST_NAS_PATH}:${NAS_PATH}"
     restart: always
