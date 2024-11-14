@@ -59,5 +59,5 @@ compose up
 `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d`
 
 ログを見る
-`docker logs remix-app-container`
-`docker logs nginx-container`
+`docker logs photoviewer-container`
+`docker logs photoviewer-nginx-container`

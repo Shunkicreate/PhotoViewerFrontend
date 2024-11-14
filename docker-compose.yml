@@ -18,6 +18,7 @@ services:
       - webnet
     environment:
       - NAS_PATH=${NAS_PATH}  # .envファイルのNAS_PATHを使用
+      - PORT=${PORT}          # .envファイルのPORTを使用
 
 networks:
   webnet:
