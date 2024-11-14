@@ -6,8 +6,7 @@ services:
       - "8081:81" # 本番用に80ポートで公開
     restart: always # サービスの自動再起動
     volumes:
-      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:rw
-    entrypoint: /bin/bash -c "envsubst < /etc/nginx/nginx.conf > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
 
   photoviewer:
     environment:
