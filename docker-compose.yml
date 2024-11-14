@@ -8,6 +8,8 @@ services:
       - photoviewer
     networks:
       - webnet
+    environment:
+      - PORT=${PORT}          # .envファイルのPORTを使用
 
   photoviewer:
     build:
