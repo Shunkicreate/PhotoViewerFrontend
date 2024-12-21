@@ -1,97 +1,82 @@
 import { useLoaderData } from "@remix-run/react";
-import { ActionFunction, json } from "@remix-run/node";
-import fs from "fs";
-import path from "path";
-import load_nas_path from "~/lib/load_nas_path";
+import { json } from "@remix-run/node";
 import Loading from "~/components/Loading";
-import { useBatchImageLoader } from "~/hooks/useBatchImageLoader";
-import sharp from "sharp";
 
-export const loader = async ({ params }: { params: { year: string; month: string } }) => {
-	const { year, month } = params;
-	if (year === "api" && month === "folders") {
-		throw new Response("Not Found", { status: 404 });
-	}
-	const NAS_PATH = load_nas_path();
-	const photoFolderPath = path.join(NAS_PATH);
-	const files = fs
-		.readdirSync(photoFolderPath)
-		.filter(
-			(file) =>
-				file.toLowerCase().endsWith(".jpg") ||
-				file.toLowerCase().endsWith(".jpeg") ||
-				file.toLowerCase().endsWith(".png") ||
-				file.toLowerCase().endsWith(".gif")
-		);
-	return json(
-		{files, totalFiles: files.length },
-		{ headers: { "Cache-Control": "public, max-age=600" } }
-	);
-};
-
-// action関数でエラーハンドリングを強化
-export const action: ActionFunction = async ({ request }) => {
-	const formData = await request.formData();
-	const files = formData.getAll("file") as string[]; // 複数のファイルを取得
-	const NAS_PATH = load_nas_path();
-
-	try {
-		const images = await Promise.all(
-			files.map(async (file) => {
-				try {
-					const filePath = path.join(NAS_PATH, file);
-					const fileBuffer = fs.readFileSync(filePath);
-					const resizedImageBuffer = await sharp(fileBuffer).rotate().resize(480).jpeg({ quality: 70 }).toBuffer();
-					return resizedImageBuffer.toString("base64");
-				} catch (error) {
-					console.error("Error processing image:", error);
-					return null;
-				}
-			})
-		);
-		return json({ files, images });
-	} catch (error) {
-		console.error("Error in action:", error);
-		return json({ error: "Error processing images" }, { status: 500 });
-	}
-};
-
-interface LoaderData {
-	files: string[];
-	totalFiles: number;
+interface ImageFile {
+    path: string;
+    name: string;
+    size: number;
+    width: number;
+    height: number;
+    data: string;  // バイトデータはbase64エンコードされた文字列として受け取ります
 }
 
+interface LoaderData {
+    files: string[];
+    totalFiles: number;
+    imageData: {
+        name: string;
+        data: string;
+        width: number;
+        height: number;
+    }[];
+}
+
+const COUNT = 16;
+const WIDTH = Math.floor(1920 / 4);
+const HEIGHT = Math.floor(1080 / 4);
+
+export const loader = async () => {
+    try {
+        const response = await fetch(`http://192.168.11.65:8082/top-photos?count=${COUNT}&width=${WIDTH}&height=${HEIGHT}`);
+        if (!response.ok) {
+            throw new Error(`API request failed: ${response.status}`);
+        }
+
+        const imageFiles: ImageFile[] = await response.json();
+        return json(
+            {
+                files: imageFiles.map(file => file.name),
+                totalFiles: imageFiles.length,
+                imageData: imageFiles.map(file => ({
+                    name: file.name,
+                    data: file.data,
+                    width: file.width,
+                    height: file.height
+                }))
+            },
+            { headers: { "Cache-Control": "public, max-age=600" } }
+        );
+    } catch (error) {
+        console.error('Error fetching images:', error);
+        return json({ error: 'Failed to fetch images' }, { status: 500 });
+    }
+};
 
 export default function Index() {
-	const { files, totalFiles } = useLoaderData<LoaderData>();
-	const { loadedFiles, loadedImages, hasMore } = useBatchImageLoader({
-		files,
-		totalFiles,
-		batchSize: 10, // 必要に応じて変更可能
-	});
+    const { files, totalFiles, imageData } = useLoaderData<LoaderData>();
 
-	return (
+    return (
 		<div className='p-4'>
-			{loadedImages.length === 0 && <Loading />}
+			{imageData?.length === 0 && <Loading />}
 			<h1 className='text-2xl sm:text-3xl'>
-				Photos
+			Photos
 			</h1>
 			<div className='mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1'>
-				{loadedImages.map((image, i) => (
-					<div key={i} className=''>
-						<a href={`/${loadedFiles[i]}`} target='_blank' rel='noreferrer'>
-							{image ? (
-								<img src={`data:image/jpeg;base64,${image}`} alt={loadedFiles[i]} className='w-full h-auto' />
-							) : (
-								<div className='w-full h-48 flex items-center justify-center bg-gray-200 text-gray-700'>
-									{loadedFiles[i]}
-								</div>
-							)}
-						</a>
+			{imageData?.map((image, i) => (
+				<div key={i} className=''>
+				{/* <a href={`/${image.name}`} target='_blank' rel='noreferrer'> */}
+					{image.data ? (
+					<img src={`data:image/jpeg;base64,${image.data}`} alt={image.name} className='w-full h-auto' />
+					) : (
+					<div className='w-full h-48 flex items-center justify-center bg-gray-200 text-gray-700'>
+						{image.name}
 					</div>
-				))}
+					)}
+				{/* </a> */}
+				</div>
+			))}
 			</div>
-			{!hasMore && <div className='text-center mt-4'>No more images</div>}
-		</div>
-	);
+        </div>
+    );
 }
