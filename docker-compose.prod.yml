@@ -11,7 +11,4 @@ services:
   photoviewer:
     environment:
       - NODE_ENV=production
-    volumes:
-      - "${HOST_NAS_PATH}:${NAS_PATH}"
     restart: always
-

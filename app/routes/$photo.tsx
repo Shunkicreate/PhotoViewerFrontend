@@ -1,25 +1,42 @@
 import { useLoaderData } from "@remix-run/react";
-import fs from "fs";
-import path from "path";
-import load_nas_path from "~/lib/load_nas_path";
+import { json } from "@remix-run/node";
+
+interface ImageFile {
+    path: string;
+    name: string;
+    size: number;
+    width: number;
+    height: number;
+    data: string;  // バイトデータはbase64エンコードされた文字列として受け取ります
+}
+
+const COUNT = 16;
+const WIDTH = Math.floor(1920 / 4);
+const HEIGHT = Math.floor(1080 / 4);
 
 // Loader function to fetch image data from NAS
 export const loader = async ({ params }: { params: { photoName: string } }) => {
 	const { photoName } = params;
-	const NAS_PATH = load_nas_path();
-	const filePath = path.join(NAS_PATH, photoName);
+	try {
+		const response = await fetch(`http://192.168.11.65:8082/photo?path=${photoName}`);
+		if (!response.ok) {
+			throw new Error(`API request failed: ${response.status}`);
+		}
 
-	if (!fs.existsSync(filePath)) {
-		throw new Response("File not found", { status: 404 });
+		const arrayBuffer = await response.arrayBuffer();
+		const base64Image = Buffer.from(arrayBuffer).toString('base64');
+		return json(
+			{
+				imageData: base64Image,
+				photoName
+			},
+			{ headers: { "Cache-Control": "public, max-age=600" } }
+		);
+		
+	} catch (error) {
+		console.error('Error fetching images:', error);
+		return json({ error: 'Failed to fetch images' }, { status: 500 });
 	}
-
-	const imageData = fs.readFileSync(filePath);
-	return new Response(JSON.stringify({ imageData: imageData.toString("base64") }), {
-		headers: {
-			"Content-Type": "application/json",
-			"Cache-Control": "public, max-age=600",
-		},
-	});
 };
 
 interface LoaderData {

@@ -65,7 +65,7 @@ export default function Index() {
 			<div className='mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1'>
 			{imageData?.map((image, i) => (
 				<div key={i} className=''>
-				{/* <a href={`/${image.name}`} target='_blank' rel='noreferrer'> */}
+				<a href={`/${image.name}`} target='_blank' rel='noreferrer'>
 					{image.data ? (
 					<img src={`data:image/jpeg;base64,${image.data}`} alt={image.name} className='w-full h-auto' />
 					) : (
@@ -73,7 +73,7 @@ export default function Index() {
 						{image.name}
 					</div>
 					)}
-				{/* </a> */}
+				</a>
 				</div>
 			))}
 			</div>
