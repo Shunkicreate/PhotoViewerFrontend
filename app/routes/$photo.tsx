@@ -1,24 +1,13 @@
 import { useLoaderData } from "@remix-run/react";
 import { json } from "@remix-run/node";
 
-interface ImageFile {
-    path: string;
-    name: string;
-    size: number;
-    width: number;
-    height: number;
-    data: string;  // バイトデータはbase64エンコードされた文字列として受け取ります
-}
-
-const COUNT = 16;
-const WIDTH = Math.floor(1920 / 4);
-const HEIGHT = Math.floor(1080 / 4);
+const ADDRESS = process.env.API_ADDRESS || '';
 
 // Loader function to fetch image data from NAS
 export const loader = async ({ params }: { params: { photoName: string } }) => {
 	const { photoName } = params;
 	try {
-		const response = await fetch(`http://192.168.11.65:8082/photo?path=${photoName}`);
+		const response = await fetch(`http://${ADDRESS}/photo?path=${photoName}`);
 		if (!response.ok) {
 			throw new Error(`API request failed: ${response.status}`);
 		}

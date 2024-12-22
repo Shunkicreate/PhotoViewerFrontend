@@ -25,10 +25,11 @@ interface LoaderData {
 const COUNT = 16;
 const WIDTH = Math.floor(1920 / 4);
 const HEIGHT = Math.floor(1080 / 4);
+const ADDRESS = process.env.API_ADDRESS || '';
 
 export const loader = async () => {
     try {
-        const response = await fetch(`http://192.168.11.65:8082/top-photos?count=${COUNT}&width=${WIDTH}&height=${HEIGHT}`);
+        const response = await fetch(`http://${ADDRESS}/top-photos?count=${COUNT}&width=${WIDTH}&height=${HEIGHT}`);
         if (!response.ok) {
             throw new Error(`API request failed: ${response.status}`);
         }
@@ -57,7 +58,7 @@ export default function Index() {
     const { files, totalFiles, imageData } = useLoaderData<LoaderData>();
 
     return (
-		<div className='p-4'>
+		<div className='p-0 md:p-4'>
 			{imageData?.length === 0 && <Loading />}
 			<h1 className='text-2xl sm:text-3xl'>
 			Photos
