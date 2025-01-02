@@ -21,7 +21,22 @@ services:
     environment:
       - NAS_PATH=${NAS_PATH}  # .envファイルのNAS_PATHを使用
       - PORT=${PORT}          # .envファイルのPORTを使用
-      - API_ADDRESS=${API_ADDRESS} # .envファイルのAPI_ADDRESSを使用
+      - BACKEND_API_ADDRESS=${BACKEND_API_ADDRESS} # .envファイルのBACKEND_API_ADDRESSを使用
+
+  app-prod:
+    container_name: photo_viewer_backend_prod
+    build:
+      context: ../PhotoViewerBackend
+      dockerfile: ../PhotoViewerBackend/Dockerfile.prod  # 本番環境用のDockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - webnet
+    environment:
+      - ENV=production
+      - NAS_PATH=${NAS_PATH}
+      - NAS_SERVER_PATH=${NAS_SERVER_PATH}
+      - BACKEND_PORT=${BACKEND_PORT}
 
 networks:
   webnet:

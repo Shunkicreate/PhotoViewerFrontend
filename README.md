@@ -53,6 +53,15 @@ Docker compose down
 `docker-compose down`
 
 ## 本番環境
+webnetでネットワーク作成
+
+```
+docker network create webnet
+docker network connect webnet photo_viewer_backend_prod
+docker network connect webnet photoviewer-container
+docker network connect webnet photoviewer-nginx-container
+```
+
 compose buildして、upする
 `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build`
 compose up

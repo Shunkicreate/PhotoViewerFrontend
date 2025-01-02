@@ -1,7 +1,7 @@
 import { useLoaderData } from "@remix-run/react";
 import { json } from "@remix-run/node";
 
-const ADDRESS = process.env.API_ADDRESS || '';
+const ADDRESS = process.env.BACKEND_API_ADDRESS || '';
 
 // Loader function to fetch image data from NAS
 export const loader = async ({ params }: { params: { photoName: string } }) => {
